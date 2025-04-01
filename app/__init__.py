@@ -9,7 +9,7 @@ def create_app():
 
     db.init_app(app)
 
-    app.register_bluepriunt(tasks_bp, url_prefix='/api/tasks')
+    app.register_blueprint(tasks_bp, url_prefix='/api/tasks')
 
     return app 
 
