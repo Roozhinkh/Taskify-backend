@@ -1,19 +1,17 @@
-from flask import requests, jsonify
+from flask import request, jsonify
 from . import tasks_bp
-from app.models import Task 
-from app.extensions import db 
+from app.models import Task
+from app.extensions import db
+from app.schemas import TaskSchema
+
+task_schema = TaskSchema()
+tasks_schema = TaskSchema(many=True)
 
 @tasks_bp.route('/', methods=['GET'])
 def get_tasks():
     try:
         tasks = Task.query.all()
-        return jsonify([{
-            'id': t.id,
-            'title': t.title,
-            'description': t.description,
-            'due_date': t.due_date,
-            'completed': t.completed
-        } for t in tasks])
+        return jsonify(tasks_schema.dump(tasks))
     except Exception as e:
         return jsonify({'message': 'Failed to retrieve tasks', 'error': str(e)}), 500
 
@@ -21,22 +19,23 @@ def get_tasks():
 def create_task():
     try:
         data = request.get_json()
-        if 'title' not in data:
-            return jsonify({'message': 'Title is required'}), 400
+        errors = task_schema.validate(data)
+        if errors:
+            return jsonify({'message': 'Invalid data', 'errors': errors}), 400
+
         new_task = Task(
             title=data['title'],
             description=data.get('description'),
-            due_date=data.get('due_date')
+            due_date=data.get('due_date'),
+            completed=data.get('completed', False)
         )
-        
+
         db.session.add(new_task)
         db.session.commit()
-    
-        return jsonify({'message': 'Task created successfully'}), 201
 
+        return jsonify({'message': 'Task created successfully', 'task': task_schema.dump(new_task)}), 201
     except Exception as e:
         db.session.rollback()
-        
         return jsonify({'message': 'Failed to create task', 'error': str(e)}), 500
 
 @tasks_bp.route('/<int:id>', methods=['PUT'])
@@ -44,6 +43,10 @@ def update_task(id):
     try:
         task = Task.query.get_or_404(id)
         data = request.get_json()
+        errors = task_schema.validate(data, partial=True)
+
+        if errors:
+            return jsonify({'message': 'Invalid data', 'errors': errors}), 400
 
         task.title = data.get('title', task.title)
         task.description = data.get('description', task.description)
@@ -51,18 +54,7 @@ def update_task(id):
         task.completed = data.get('completed', task.completed)
 
         db.session.commit()
-        return jsonify({'message' : 'Task updated successfully'})
+        return jsonify({'message': 'Task updated successfully', 'task': task_schema.dump(task)})
     except Exception as e:
         db.session.rollback()
         return jsonify({'message': 'Failed to update task', 'error': str(e)}), 500
-
-@tasks_bp.route('/<int:id>', methods=['DELETE'])
-def delete_task(id):
-    try:           
-        task = Task.query.get_or_404(id)
-        db.session.delete(task)
-        db.session.commit()
-        return jsonify({'message' : 'Task deleted successfully'})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'message': 'Failed to delete task', 'error': str(e)}), 500
