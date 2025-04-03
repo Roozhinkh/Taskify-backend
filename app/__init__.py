@@ -1,5 +1,5 @@
 from flask import Flask
-from .extensions import db, ma
+from .extensions import db, ma, migrate  # Import migrate from extensions
 from .config import Config
 from .tasks import tasks_bp
 from .auth import auth_bp  # Import the auth blueprint
@@ -12,12 +12,13 @@ def create_app():
     # Load configuration from the Config object
     app.config.from_object(Config)
 
-    # Initialize the database and Marshmallow
+    # Initialize the database, Marshmallow, and Flask-Migrate
     db.init_app(app)
     ma.init_app(app)
+    migrate.init_app(app, db)  # Initialize Flask-Migrate with the app and db
 
     # Initialize JWTManager with the app
-    jwt = JWTManager(app)  # Initialize JWTManager with the Flask app (no need to separately create an instance)
+    jwt = JWTManager(app)  # Initialize JWTManager with the Flask app
 
     # Register the blueprints
     app.register_blueprint(tasks_bp, url_prefix='/api/tasks')  # Register the tasks blueprint

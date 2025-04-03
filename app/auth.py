@@ -4,7 +4,6 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from app.extensions import db
 from .models import User
 
-# Initialize Blueprint
 auth_bp = Blueprint('auth', __name__)
 
 # Initialize the JWT manager
