@@ -1,14 +1,13 @@
 from flask import request, jsonify
 from . import tasks_bp
-from app.models import Task
+from app.models import Task, ContactMessage
 from app.extensions import db
 from app.schemas import TaskSchema
-from app import app
-from app.models import ContactMessage
 
 task_schema = TaskSchema()
 tasks_schema = TaskSchema(many=True)
 
+# Task routes
 @tasks_bp.route('/', methods=['GET'])
 def get_tasks():
     try:
@@ -74,8 +73,9 @@ def delete_task(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'message': 'Failed to delete task', 'error': str(e)}), 500
-    
-@app.route('/api/contact', methods=['POST'])
+
+
+@tasks_bp.route('/api/contact', methods=['POST'])
 def contact():
     data = request.json
     try:
