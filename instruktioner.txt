@@ -1,0 +1,19 @@
+1. Clona repot så ni får en backend mapp. 
+
+2. CD in i mappen 
+
+3. Initiera venv 
+
+4. Installera requirements via PIP
+
+5. Pova köra Flask (borde fungera)
+
+6. Se till att du har en databas som fungerar (detta har inget med VS code eller flask att göra utan sätts upp separat om ni kör lokalt)
+
+7. Så har ni en mysql skapar ni en taskify db och anger det i strängen, exempel: mysql+mysqlconnector://root:@localhost/mydb  (notera att root är användarnamn och efter : finns inget lösenod, /mydb är namnet på er databas)
+
+8. Skapa en .env fil och var noga med att det är samma variabelnamn som vi kallar på i db.py
+
+9. Lägg till din connection string i .env och du bör kopplas upp mot din databas, du kan nu prova CRUD via PostMan
+
+10. BYGG VIDARE OCH HA KUL
