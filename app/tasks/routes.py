@@ -3,6 +3,8 @@ from . import tasks_bp
 from app.models import Task
 from app.extensions import db
 from app.schemas import TaskSchema
+from app import app
+from app.models import ContactMessage
 
 task_schema = TaskSchema()
 tasks_schema = TaskSchema(many=True)
@@ -72,3 +74,18 @@ def delete_task(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'message': 'Failed to delete task', 'error': str(e)}), 500
+    
+@app.route('/api/contact', methods=['POST'])
+def contact():
+    data = request.json
+    try:
+        message = ContactMessage(
+            name=data['name'],
+            email=data['email'],
+            message=data['message']
+        )
+        db.session.add(message)
+        db.session.commit()
+        return jsonify({'message': 'Meddelandet har sparats'}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
